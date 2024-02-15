@@ -1,7 +1,7 @@
 //
 // Created by noah holt on 2/14/24.
 //
-#include "proj1.h"
+#include "list.h"
 
 /*
  * Prints every string in each node of the list linkList, whith a new like
@@ -9,7 +9,17 @@
  */
 void print_list(list* linkList){
 
+    //set placeholder
+    list* element = linkList;
 
+    //print while still has next
+    while (element.next != null){
+        printf(element.item, '\n');
+        element = linkList.next
+    } // print all except last string
+
+    //print last thing
+    printf(element.item, '\n');
 
 }
 

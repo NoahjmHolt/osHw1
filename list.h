@@ -2,11 +2,16 @@
 // Created by noah holt on 2/14/24.
 //
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #ifndef OSHW1_PROJ1_H
 #define OSHW1_PROJ1_H
 
 /* Declaring all the structs */
 typedef struct Node node ;
+
  struct Node {
      char *item ;
      node *next ;
