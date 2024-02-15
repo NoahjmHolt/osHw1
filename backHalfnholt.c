@@ -10,12 +10,12 @@
 void print_list(list* linkList){
 
     //set placeholder
-    list* element = linkList;
+    Node element = linkList->head;
 
     //print while still has next
-    while (element.next != null){
+    while (element->next != null){
         printf(element.item, '\n');
-        element = linkList.next
+        element = element.next;
     } // print all except last string
 
     //print last thing
@@ -30,7 +30,14 @@ void print_list(list* linkList){
  */
 void flush_list(list* linkList){
 
+    //set placeholder
+    Node element = linkList->head;
 
+    //set first element to no words and free end of list.
+    while (element.next != null){
+        element.item = "";
+        free(element.next);
+    } // This doesn't seem right but can talk with group member later.
 
 }
 
@@ -40,6 +47,7 @@ void flush_list(list* linkList){
  */
 void free_list(list* linkList){
 
-
+    free(linkList);
+    //this also seems wrong but will find out tomorrow.
 
 }

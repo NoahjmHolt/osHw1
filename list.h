@@ -17,7 +17,7 @@ typedef struct Node node ;
      node *next ;
  };
 
-typedef Node {
+typedef struct List{
      node *head;
  } list;
 
