@@ -13,7 +13,7 @@ void print_list(list* linkList){
     Node element = linkList->head;
 
     //print while still has next
-    while (element->next != null){
+    while (element->next != NULL){
         printf(element.item, '\n');
         element = element.next;
     } // print all except last string
@@ -34,7 +34,7 @@ void flush_list(list* linkList){
     Node element = linkList->head;
 
     //set first element to no words and free end of list.
-    while (element.next != null){
+    while (element.next != NULL){
         linkList->head = element.next;
         free(element.next);
     } // This doesn't seem right but can talk with group member later.
@@ -53,7 +53,7 @@ void free_list(list* linkList){
     Node element = linkList->head;
 
     //set first element to no words and free end of list.
-    while (element.next != null){
+    while (element.next != NULL){
         linkList->head = element.next;
         free(element.next);
     } // This doesn't seem right but can talk with group member later.
