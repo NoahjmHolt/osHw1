@@ -30,16 +30,18 @@ void print_list(list* linkList){
  */
 void flush_list(list* linkList){
 
-    //set placeholder
-    Node element = linkList->head;
+
 
     //set first element to no words and free end of list.
-    while (element.next != NULL){
-        linkList->head = element.next;
-        free(element.next);
-    } // This doesn't seem right but can talk with group member later.
+    while (linkList.head != NULL){
 
-    free(linkList->head);
+        //set placeholder
+        Node element = linkList->head;
+
+        linkList->head = element.next;
+        free(element);
+
+    }
 
 }
 
@@ -49,16 +51,16 @@ void flush_list(list* linkList){
  */
 void free_list(list* linkList){
 
-    //set placeholder
-    Node element = linkList->head;
-
     //set first element to no words and free end of list.
-    while (element.next != NULL){
+    while (linkList->head != NULL){
+
+        //set placeholder
+        Node element = linkList->head;
+
         linkList->head = element.next;
         free(element.next);
-    } // This doesn't seem right but can talk with group member later.
+    }
 
-    free(linkList->head);
     free(linkList);
 
 }
