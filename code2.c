@@ -1,90 +1,76 @@
-#include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
+#include <stdlib.h>
 #include <pthread.h>
+#include <stdbool.h>
 
-#define MAX 1024
-#define NUM_THREADS 4 // You can adjust the number of threads as needed
+#define BUFFER_SIZE 12
 
-int total = 0;
-int n1, n2;
-char *s1, *s2;
-FILE *fp;
-pthread_mutex_t lock;
+char buffer[BUFFER_SIZE];
+int in = 0;
+int out = 0;
+int count = 0;
+bool eof = false;
 
-void* search_substrings(void* arg) {
-    long id = (long)arg;
-    int start = (n1 / NUM_THREADS) * id;
-    int end = (id == NUM_THREADS - 1) ? n1 - n2 + 1 : (n1 / NUM_THREADS) * (id + 1);
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t full = PTHREAD_COND_INITIALIZER;
+pthread_cond_t empty = PTHREAD_COND_INITIALIZER;
 
-    int local_count = 0;
-    int i,j,k;
-    for (i = start; i < end; i++) {
-        int count = 0;
-        for (j = i, k = 0; k < n2; j++, k++) {
-            if (*(s1 + j) != *(s2 + k)) {
-                break;
-            } else {
-                count++;
-            }
-            if (count == n2) {
-                local_count++;
-            }
-        }
+void *producer(void *arg) {
+    FILE *file = fopen("message.txt", "r");
+    if (!file) {
+        perror("Error opening file");
+        exit(EXIT_FAILURE);
     }
 
-    pthread_mutex_lock(&lock);
-    total += local_count;
-    pthread_mutex_unlock(&lock);
+    char ch;
+    while ((ch = fgetc(file)) != EOF) {
+        pthread_mutex_lock(&mutex);
+        while (count == BUFFER_SIZE) {
+            pthread_cond_wait(&empty, &mutex);
+}
+	buffer[in] = ch;
+        in = (in + 1) % BUFFER_SIZE;
+        count++;
+        pthread_cond_signal(&full);
+        pthread_mutex_unlock(&mutex);
+    }
+
+    eof = true;
+    fclose(file);
+    pthread_exit(NULL);
+}
+
+void *consumer(void *arg) {
+    while (1) {
+pthread_mutex_lock(&mutex);
+        while (count == 0 && !eof) {
+            pthread_cond_wait(&full, &mutex);
+        }
+
+	if (count == 0 && eof) {
+                break;
+        }
+
+	char ch = buffer[out];
+        out = (out + 1) % BUFFER_SIZE;
+        count--;
+        pthread_cond_signal(&empty);
+        pthread_mutex_unlock(&mutex);
+        printf("%c", ch);
+fflush(stdout); // Flush stdout to ensure characters are printed immediately
+    }
 
     pthread_exit(NULL);
 }
 
-int readf(FILE *fp) {
-    if ((fp = fopen("strings.txt", "r")) == NULL) {
-        printf("ERROR: can't open string.txt!\n");
-        return 0;
-    }
-    s1 = (char *)malloc(sizeof(char) * MAX);
-    if (s1 == NULL) {
-        printf("ERROR: Out of memory!\n");
-        return -1;
-    }
-    s2 = (char *)malloc(sizeof(char) * MAX);
-    if (s2 == NULL) {
-        printf("ERROR: Out of memory\n");
-        return -1;
-    }
-    /*read s1 s2 from the file*/
-    s1 = fgets(s1, MAX, fp);
-    s2 = fgets(s2, MAX, fp);
-    n1 = strlen(s1) - 1; /*length of s1*/
-    n2 = strlen(s2) - 1; /*length of s2*/
+int main() {
+    pthread_t producer_thread, consumer_thread;
 
-    if (s1 == NULL || s2 == NULL || n1 < n2) /*when error exit*/
-        return -1;
+    pthread_create(&producer_thread, NULL, producer, NULL);
+    pthread_create(&consumer_thread, NULL, consumer, NULL);
 
-    return 1;
+    pthread_join(producer_thread, NULL);
+    pthread_join(consumer_thread, NULL);
+  return 0;
 }
 
-int main(int argc, char *argv[]) {
-    int count;
-    pthread_t threads[NUM_THREADS];
-    pthread_mutex_init(&lock, NULL);
-
-    readf(fp);
-
-    int i;
-    for (i = 0; i < NUM_THREADS; i++) {
-        pthread_create(&threads[i], NULL, search_substrings, (void*)i);
-    }
-
-    for (i = 0; i < NUM_THREADS; i++) {
-        pthread_join(threads[i], NULL);
-    }
-
-    pthread_mutex_destroy(&lock);
-
-    printf("The number of substrings is: %d\n", total);
-    return 1;
-}
