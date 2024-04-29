@@ -1,39 +1,36 @@
-1. Define constants:
-    - MAX: Maximum length of strings
-    - NUM_THREADS: Number of threads to use
+1. Declare condition variables:
+    - full: Signaled when buffer is full
+    - empty: Signaled when buffer is empty
 
-2. Declare global variables:
-    - total: Total count of matching substrings
-    - n1, n2: Lengths of strings s1 and s2
-    - s1, s2: Pointers to strings read from file
-    - fp: File pointer
-    - mutex: Mutex lock for thread synchronization
-
-3. Define function prototype:
-    - search_substring(void* arg): Thread function to search for substrings
-
-4. Implement search_substring(void* arg) function:
-    - Calculate end index based on start index and number of threads
-    - Iterate over the assigned portion of s1:
-        - For each substring of length n2:
-            - Compare characters of s1 and s2
-            - If all characters match, increment local count
-            - Lock mutex before updating total count
-            - Increment total count
-            - Unlock mutex after updating total count
+2. Implement producer(void *arg) function:
+    - Open file "message.txt" for reading
+    - Loop until end-of-file:
+        - Acquire mutex lock
+        - While buffer is full, wait on the "empty" condition variable
+        - Read character from file
+        - Insert character into buffer
+        - Update buffer index and count
+        - Signal the "full" condition variable
+        - Release mutex lock
+    - Set eof flag to true
+    - Close file
     - Exit thread
 
-5. In the main program:
-    - Declare variables:
-        - threads[NUM_THREADS]: Array to hold thread IDs
-        - thread_args[NUM_THREADS]: Array to hold start indices for each thread
-    - Call readf(fp) to read strings from file
-    - Create threads:
-        - For each thread ID from 0 to NUM_THREADS-1:
-            - Calculate start index for the thread
-            - Create thread with search_substring function and start index as argument
-    - Wait for threads to finish:
-        - For each thread:
-            - Wait for thread to finish using pthread_join
-    - Output total count of matching substrings
+3. Implement consumer(void *arg) function:
+    - Loop indefinitely:
+        - Acquire mutex lock
+        - While buffer is empty and not at end-of-file, wait on the "full" condition variable
+        - If buffer is empty and at end-of-file, break out of the loop
+        - Retrieve character from buffer
+        - Update buffer index and count
+        - Signal the "empty" condition variable
+        - Print the character to stdout
+        - Flush stdout to ensure characters are printed immediately
+        - Release mutex lock
+    - Exit thread
+
+4. In the main program:
+    - Declare producer and consumer threads
+    - Create producer and consumer threads
+    - Wait for producer and consumer threads to finish
     - Exit program
