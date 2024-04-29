@@ -1,0 +1,40 @@
+1. Define constants:
+    - MAX: Maximum length of strings
+    - NUM_THREADS: Number of threads to use
+
+2. Declare global variables:
+    - total: Total count of matching substrings
+    - n1, n2: Lengths of strings s1 and s2
+    - s1, s2: Pointers to strings read from file
+    - fp: File pointer
+    - lock: Mutex lock for thread synchronization
+
+3. Define function prototype:
+    - search_substrings(void* arg): Thread function to search for substrings
+
+4. Implement search_substrings(void* arg) function:
+    - Cast argument to long to get thread ID
+    - Calculate start and end indices for this thread's portion of s1
+    - Initialize local_count to 0
+    - Iterate over the assigned portion of s1:
+        - For each substring of length n2:
+            - Compare characters of s1 and s2
+            - If all characters match, increment local_count
+    - Lock mutex to update total count
+    - Add local_count to total
+    - Unlock mutex
+    - Exit thread
+
+5. In the main program:
+    - Declare variables:
+        - threads[NUM_THREADS]: Array to hold thread IDs
+    - Initialize mutex lock
+    - Create threads:
+        - For each thread ID from 0 to NUM_THREADS-1:
+            - Create thread with search_substrings function and thread ID as argument
+    - Wait for threads to finish:
+        - For each thread:
+            - Wait for thread to finish using pthread_join
+    - Destroy mutex lock
+    - Output total count of matching substrings
+    - Exit program
