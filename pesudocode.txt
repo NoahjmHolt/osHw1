@@ -7,34 +7,33 @@
     - n1, n2: Lengths of strings s1 and s2
     - s1, s2: Pointers to strings read from file
     - fp: File pointer
-    - lock: Mutex lock for thread synchronization
+    - mutex: Mutex lock for thread synchronization
 
 3. Define function prototype:
-    - search_substrings(void* arg): Thread function to search for substrings
+    - search_substring(void* arg): Thread function to search for substrings
 
-4. Implement search_substrings(void* arg) function:
-    - Cast argument to long to get thread ID
-    - Calculate start and end indices for this thread's portion of s1
-    - Initialize local_count to 0
+4. Implement search_substring(void* arg) function:
+    - Calculate end index based on start index and number of threads
     - Iterate over the assigned portion of s1:
         - For each substring of length n2:
             - Compare characters of s1 and s2
-            - If all characters match, increment local_count
-    - Lock mutex to update total count
-    - Add local_count to total
-    - Unlock mutex
+            - If all characters match, increment local count
+            - Lock mutex before updating total count
+            - Increment total count
+            - Unlock mutex after updating total count
     - Exit thread
 
 5. In the main program:
     - Declare variables:
         - threads[NUM_THREADS]: Array to hold thread IDs
-    - Initialize mutex lock
+        - thread_args[NUM_THREADS]: Array to hold start indices for each thread
+    - Call readf(fp) to read strings from file
     - Create threads:
         - For each thread ID from 0 to NUM_THREADS-1:
-            - Create thread with search_substrings function and thread ID as argument
+            - Calculate start index for the thread
+            - Create thread with search_substring function and start index as argument
     - Wait for threads to finish:
         - For each thread:
             - Wait for thread to finish using pthread_join
-    - Destroy mutex lock
     - Output total count of matching substrings
     - Exit program
