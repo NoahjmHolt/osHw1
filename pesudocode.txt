@@ -1,36 +1,13 @@
-1. Declare condition variables:
-    - full: Signaled when buffer is full
-    - empty: Signaled when buffer is empty
+1. Declare pthread_mutex_t mutex_lock
 
-2. Implement producer(void *arg) function:
-    - Open file "message.txt" for reading
-    - Loop until end-of-file:
-        - Acquire mutex lock
-        - While buffer is full, wait on the "empty" condition variable
-        - Read character from file
-        - Insert character into buffer
-        - Update buffer index and count
-        - Signal the "full" condition variable
-        - Release mutex lock
-    - Set eof flag to true
-    - Close file
-    - Exit thread
+2. Modify producer_thread function:
+    - Change the critical section handling:
+        - Replace pthread_mutex_lock with pthread_mutex_trylock to attempt to acquire the mutex without blocking
+        - Add a while loop to continuously attempt to access the critical region until the mutex is acquired
 
-3. Implement consumer(void *arg) function:
-    - Loop indefinitely:
-        - Acquire mutex lock
-        - While buffer is empty and not at end-of-file, wait on the "full" condition variable
-        - If buffer is empty and at end-of-file, break out of the loop
-        - Retrieve character from buffer
-        - Update buffer index and count
-        - Signal the "empty" condition variable
-        - Print the character to stdout
-        - Flush stdout to ensure characters are printed immediately
-        - Release mutex lock
-    - Exit thread
-
-4. In the main program:
-    - Declare producer and consumer threads
-    - Create producer and consumer threads
-    - Wait for producer and consumer threads to finish
-    - Exit program
+3. Modify main function:
+    - Remove the declaration of int i and int NUM_PROCS; they are declared later in the code
+    - Modify the initialization of the cpu_array:
+        - Allocate memory for cpu_array based on the number of processors
+        - Initialize cpu_array with processor IDs
+    - Remove the redundant else statement after initializing cpu_array
